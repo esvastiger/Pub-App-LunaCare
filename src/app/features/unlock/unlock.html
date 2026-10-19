@@ -1,0 +1,81 @@
+<div class="flex min-h-dvh items-center justify-center p-5">
+  <div class="w-full max-w-md">
+    <div class="card overflow-hidden">
+      <div class="bg-linear-to-br from-blush-100 to-lilac-100 px-8 pt-8 pb-6 text-center">
+        <span
+          class="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-white/80 text-plum-500 shadow-card"
+        >
+          <app-icon name="lock" class="text-2xl" />
+        </span>
+        <h1 class="mt-3 font-display text-2xl font-bold text-plum-800">Bóveda cerrada</h1>
+        <p class="mt-1 text-sm font-semibold leading-relaxed text-plum-500">
+          Por tu seguridad, tu clave no se guarda en el dispositivo.<br />
+          Introduce tu {{ secretLabel() }} para descifrar tus datos.
+        </p>
+        @if (isAnonymous() && maskedRef()) {
+          <p class="mt-3 font-mono text-xs font-bold tracking-widest text-plum-400">
+            {{ maskedRef() }}
+          </p>
+        } @else if (session()?.email; as email) {
+          <p class="mt-3 text-xs font-bold text-plum-400">{{ email }}</p>
+        }
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4 p-7 sm:p-8">
+        <div>
+          <label class="label" for="secret">Tu {{ secretLabel() }}</label>
+          <input
+            id="secret"
+            class="input text-center text-2xl font-bold"
+            [class.tracking-[0.5em]]="needsPin()"
+            type="password"
+            [attr.inputmode]="needsPin() ? 'numeric' : 'text'"
+            autocomplete="current-password"
+            formControlName="secret"
+            (input)="onInput($event)"
+            [attr.placeholder]="needsPin() ? '••••' : 'Tu contraseña'"
+          />
+          @if (error()) {
+            <p class="error-text">{{ error() }}</p>
+          }
+        </div>
+
+        <button type="submit" class="btn-primary w-full" [disabled]="busy()">
+          @if (busy()) {
+            <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-opacity=".25"
+                stroke-width="4"
+              />
+              <path
+                d="M22 12a10 10 0 0 0-10-10"
+                stroke="currentColor"
+                stroke-width="4"
+                stroke-linecap="round"
+              />
+            </svg>
+            Descifrando…
+          } @else {
+            Desbloquear
+          }
+        </button>
+
+        <button
+          type="button"
+          class="w-full text-center text-xs font-bold text-plum-400 transition hover:text-plum-600"
+          (click)="useAnotherAccount()"
+        >
+          Usar otra cuenta
+        </button>
+      </form>
+    </div>
+
+    <p class="mt-4 text-center text-[11px] font-semibold text-plum-400">
+      🔒 Tu {{ secretLabel() }} nunca se envía al servidor: solo se usa aquí para derivar la clave.
+    </p>
+  </div>
+</div>

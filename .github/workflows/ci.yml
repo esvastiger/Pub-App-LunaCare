@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Tipos, formato y build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Tipos
+        run: npm run typecheck
+
+      - name: Formato
+        run: npm run format:check
+
+      - name: Build de producción
+        run: npm run build
+
+      - name: Comprobar que el service worker y el manifest existen
+        run: |
+          set -euo pipefail
+          ls dist/LunaCare/browser/ngsw-worker.js
+          ls dist/LunaCare/browser/manifest.webmanifest
+          ls dist/LunaCare/browser/ngsw.json
+
+  php:
+    name: Sintaxis PHP
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+
+      - name: Lint del backend
+        run: |
+          set -euo pipefail
+          for f in backend/api/*.php; do php -l "$f"; done

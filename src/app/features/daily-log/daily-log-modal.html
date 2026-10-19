@@ -1,0 +1,435 @@
+<div class="space-y-4">
+  <!-- Flujo -->
+  <section class="field-card">
+    <div class="mb-3 flex items-center gap-2.5">
+      <span class="field-icon">🩸</span>
+      <h3 class="label !mb-0">Flujo</h3>
+    </div>
+    <div class="seg-row">
+      @for (f of flows; track f.id) {
+        <button
+          type="button"
+          [class]="segClass(flowSel(), f.id)"
+          [attr.aria-pressed]="flowSel() === f.id"
+          (click)="pick(flowSel, f.id)"
+        >
+          {{ f.label }}
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Dolor -->
+  <section class="field-card">
+    <div class="mb-3 flex items-center gap-2.5">
+      <span class="field-icon">🤕</span>
+      <h3 class="label !mb-0">Dolor</h3>
+    </div>
+    <div class="seg-row">
+      @for (o of intensities; track o.id) {
+        <button
+          type="button"
+          [class]="segClass(painSel(), o.id)"
+          [attr.aria-pressed]="painSel() === o.id"
+          (click)="pick(painSel, o.id)"
+        >
+          {{ o.label }}
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Estado de ánimo -->
+  <section class="field-card">
+    <div class="mb-2 flex items-center gap-2.5">
+      <span class="field-icon">💭</span>
+      <h3 class="label !mb-0">Estado de ánimo</h3>
+    </div>
+    <div class="flex items-baseline gap-3">
+      <span class="scale-hero">{{ moodScale() }}</span>
+      <span class="scale-value">0 bajo · 10 excelente</span>
+    </div>
+    <input
+      type="range"
+      min="0"
+      max="10"
+      step="1"
+      class="mt-1 w-full"
+      [style.--pct]="moodPct()"
+      [value]="moodScale()"
+      (input)="onMood($event)"
+      aria-label="Estado de ánimo de 0 a 10"
+    />
+    <div class="range-ticks"><span>0 · bajo</span><span>10 · excelente</span></div>
+  </section>
+
+  <!-- Libido -->
+  <section class="field-card">
+    <div class="mb-2 flex items-center gap-2.5">
+      <span class="field-icon">💗</span>
+      <h3 class="label !mb-0">Libido</h3>
+    </div>
+    <div class="flex items-baseline gap-3">
+      <span class="scale-hero">{{ libido() }}</span>
+      <span class="scale-value">0 sin deseo · 10 pico</span>
+    </div>
+    <input
+      type="range"
+      min="0"
+      max="10"
+      step="1"
+      class="mt-1 w-full"
+      [style.--pct]="libidoPct()"
+      [value]="libido()"
+      (input)="libido.set(+$any($event.target).value)"
+      aria-label="Libido de 0 a 10"
+    />
+    <div class="range-ticks"><span>0 · sin deseo</span><span>10 · pico</span></div>
+  </section>
+
+  <!-- Calidad del sueño -->
+  <section class="field-card">
+    <div class="mb-2 flex items-center gap-2.5">
+      <span class="field-icon">🌙</span>
+      <h3 class="label !mb-0">Calidad del sueño</h3>
+    </div>
+    <div class="flex items-baseline gap-3">
+      <span class="scale-hero">{{ sleep() }}</span>
+      <span class="scale-value">0 pésimo · 10 reparador</span>
+    </div>
+    <input
+      type="range"
+      min="0"
+      max="10"
+      step="1"
+      class="mt-1 w-full"
+      [style.--pct]="sleepPct()"
+      [value]="sleep()"
+      (input)="sleep.set(+$any($event.target).value)"
+      aria-label="Calidad del sueño de 0 a 10"
+    />
+    <div class="range-ticks"><span>0 · pésimo</span><span>10 · reparador</span></div>
+  </section>
+
+  <!-- Nivel de estrés -->
+  <section class="field-card">
+    <div class="mb-3 flex items-center gap-2.5">
+      <span class="field-icon">🧘</span>
+      <h3 class="label !mb-0">Nivel de estrés</h3>
+    </div>
+    <div class="seg-row">
+      @for (o of stress; track o.id) {
+        <button
+          type="button"
+          [class]="segClass(stressSel(), o.id)"
+          [attr.aria-pressed]="stressSel() === o.id"
+          (click)="pick(stressSel, o.id)"
+        >
+          {{ o.emoji }} {{ o.label }}
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Temperatura basal -->
+  <section class="field-card">
+    <div class="mb-2 flex items-center gap-2.5">
+      <span class="field-icon">🌡️</span>
+      <h3 class="label !mb-0">Temperatura basal (BBT)</h3>
+    </div>
+    <div class="relative">
+      <input
+        type="text"
+        inputmode="decimal"
+        class="input pr-12"
+        placeholder="36,5"
+        [value]="bbtText()"
+        (input)="onBbt($event)"
+        aria-label="Temperatura basal en grados centígrados"
+      />
+      <span class="absolute inset-y-0 right-4 flex items-center text-sm font-bold text-plum-400"
+        >°C</span
+      >
+    </div>
+    <p class="mt-1 text-[11px] font-semibold text-plum-300">
+      Mide al despertar, antes de levantarte · {{ bbtMin }}–{{ bbtMax }} °C
+    </p>
+    @if (bbtError()) {
+      <p class="error-text">{{ bbtError() }}</p>
+    }
+  </section>
+
+  <!-- Moco cervical -->
+  <section class="field-card">
+    <div class="mb-3 flex items-center gap-2.5">
+      <span class="field-icon">💧</span>
+      <h3 class="label !mb-0">Moco cervical</h3>
+    </div>
+    <div class="seg-row">
+      @for (o of mucus; track o.id) {
+        <button
+          type="button"
+          [class]="segClass(mucusSel(), o.id)"
+          [attr.aria-pressed]="mucusSel() === o.id"
+          (click)="pick(mucusSel, o.id)"
+        >
+          {{ o.label }}
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Cérvix -->
+  <section class="field-card">
+    <div class="mb-3 flex items-center gap-2.5">
+      <span class="field-icon">🌸</span>
+      <h3 class="label !mb-0">Cérvix</h3>
+    </div>
+    <div class="space-y-3">
+      <div>
+        <p class="mb-1.5 text-[11px] font-bold text-plum-400 uppercase">Altura</p>
+        <div class="seg-row">
+          @for (o of cervixHeight; track o.id) {
+            <button
+              type="button"
+              [class]="segClass(cervixHSel(), o.id)"
+              (click)="pick(cervixHSel, o.id)"
+            >
+              {{ o.label }}
+            </button>
+          }
+        </div>
+      </div>
+      <div>
+        <p class="mb-1.5 text-[11px] font-bold text-plum-400 uppercase">Apertura</p>
+        <div class="seg-row">
+          @for (o of cervixOpening; track o.id) {
+            <button
+              type="button"
+              [class]="segClass(cervixOSel(), o.id)"
+              (click)="pick(cervixOSel, o.id)"
+            >
+              {{ o.label }}
+            </button>
+          }
+        </div>
+      </div>
+      <div>
+        <p class="mb-1.5 text-[11px] font-bold text-plum-400 uppercase">Firmeza</p>
+        <div class="seg-row">
+          @for (o of cervixFirmness; track o.id) {
+            <button
+              type="button"
+              [class]="segClass(cervixFSel(), o.id)"
+              (click)="pick(cervixFSel, o.id)"
+            >
+              {{ o.label }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sensibilidad mamaria -->
+  <section class="field-card">
+    <div class="mb-3 flex items-center gap-2.5">
+      <span class="field-icon">🎗️</span>
+      <h3 class="label !mb-0">Sensibilidad mamaria</h3>
+    </div>
+    <div class="seg-row">
+      @for (o of intensities; track o.id) {
+        <button
+          type="button"
+          [class]="segClass(breastSel(), o.id)"
+          [attr.aria-pressed]="breastSel() === o.id"
+          (click)="pick(breastSel, o.id)"
+        >
+          {{ o.label }}
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Digestión -->
+  <section class="field-card">
+    <div class="mb-3 flex items-center gap-2.5">
+      <span class="field-icon">🍵</span>
+      <h3 class="label !mb-0">Digestión</h3>
+    </div>
+    <div class="seg-wrap">
+      @for (o of digestion; track o.id) {
+        <button
+          type="button"
+          class="seg !flex-none px-3 py-2"
+          [class]="segClass(digestionSel(), o.id)"
+          [attr.aria-pressed]="digestionSel() === o.id"
+          (click)="pick(digestionSel, o.id)"
+        >
+          {{ o.emoji }} {{ o.label }}
+        </button>
+      }
+    </div>
+    @if (digestionSel() === 'other') {
+      <input
+        type="text"
+        class="other-input"
+        maxlength="80"
+        placeholder="Especifica cómo te sientes (p. ej. acidez, gases…)"
+        [value]="digestionOther()"
+        (input)="onDigestionOther($event)"
+        aria-label="Especifica otro síntoma digestivo"
+      />
+    }
+  </section>
+
+  <!-- Síntomas -->
+  <section class="field-card">
+    <div class="mb-3 flex items-center gap-2.5">
+      <span class="field-icon">📋</span>
+      <h3 class="label !mb-0">Síntomas</h3>
+    </div>
+    <div class="seg-wrap">
+      @for (s of symptoms; track s.id) {
+        <button
+          type="button"
+          [class]="symptomClass(s.id)"
+          [attr.aria-pressed]="symptomsSel().includes(s.id)"
+          (click)="toggleSymptom(s.id)"
+        >
+          {{ s.emoji }} {{ s.label }}
+        </button>
+      }
+    </div>
+    @if (symptomsSel().includes('other')) {
+      <input
+        type="text"
+        class="other-input"
+        maxlength="80"
+        placeholder="Especifica el síntoma (p. ej. dolor de ovarios…)"
+        [value]="symptomsOther()"
+        (input)="onSymptomsOther($event)"
+        aria-label="Especifica otro síntoma"
+      />
+    }
+  </section>
+
+  <!-- Piel -->
+  <section class="field-card">
+    <div class="mb-3 flex items-center gap-2.5">
+      <span class="field-icon">✨</span>
+      <h3 class="label !mb-0">Piel</h3>
+    </div>
+    <div class="seg-row">
+      @for (o of skin; track o.id) {
+        <button
+          type="button"
+          [class]="segClass(skinSel(), o.id)"
+          [attr.aria-pressed]="skinSel() === o.id"
+          (click)="pick(skinSel, o.id)"
+        >
+          {{ o.label }}
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Alcohol -->
+  <section class="field-card">
+    <div class="mb-3 flex items-center gap-2.5">
+      <span class="field-icon">🍸</span>
+      <h3 class="label !mb-0">Alcohol</h3>
+    </div>
+    <div class="seg-row">
+      @for (o of alcohol; track o.id) {
+        <button
+          type="button"
+          [class]="segClass(alcoholSel(), o.id)"
+          [attr.aria-pressed]="alcoholSel() === o.id"
+          (click)="pick(alcoholSel, o.id)"
+        >
+          {{ o.emoji }} {{ o.label }}
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Enfermedad o medicación -->
+  <section class="field-card">
+    <div class="mb-2 flex items-center gap-2.5">
+      <span class="field-icon">💊</span>
+      <h3 class="label !mb-0">Enfermedad o medicación</h3>
+    </div>
+    <textarea
+      class="input min-h-16 resize-none"
+      maxlength="200"
+      placeholder="Ibuprofeno 400 mg, anticonceptivos, catarro…"
+      [value]="meds()"
+      (input)="onMeds($event)"
+      aria-label="Enfermedad o medicación"
+    ></textarea>
+  </section>
+
+  <!-- ¿Cómo te sientes? -->
+  <section class="field-card">
+    <div class="mb-1 flex items-center gap-2.5">
+      <span class="field-icon">💜</span>
+      <h3 class="label !mb-0">¿Cómo te sientes?</h3>
+    </div>
+    <p class="mb-3 text-[11px] font-semibold text-plum-300">
+      Elige un estado y la escala de ánimo se ajusta a su punto
+    </p>
+    <div class="grid grid-cols-4 gap-2 sm:grid-cols-8">
+      @for (m of moods; track m.id) {
+        <button
+          type="button"
+          class="flex flex-col items-center gap-1 rounded-2xl px-1 py-2.5 text-[10px] font-bold transition"
+          [class]="moodClass(m.id)"
+          [attr.aria-pressed]="moodSel() === m.id"
+          (click)="toggleMood(m.id)"
+        >
+          <span class="text-xl">{{ m.emoji }}</span>
+          {{ m.label }}
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Nota -->
+  <section class="field-card">
+    <div class="mb-2 flex items-center gap-2.5">
+      <span class="field-icon">📝</span>
+      <h3 class="label !mb-0">Nota personal</h3>
+    </div>
+    <textarea
+      class="input min-h-24 resize-none"
+      maxlength="500"
+      placeholder="Hoy me siento… / apuntes para tu próxima visita médica…"
+      [value]="note()"
+      (input)="onNote($event)"
+      aria-label="Nota personal"
+    ></textarea>
+    <p class="mt-1 text-right text-[11px] font-bold text-plum-300">
+      {{ note().length }}/500 · cifrado en tu dispositivo
+    </p>
+  </section>
+
+  <!-- Acciones -->
+  <div
+    class="sticky bottom-0 z-10 mt-1 flex items-center justify-between gap-3 rounded-2xl bg-white/95 p-2 shadow-card ring-1 ring-plum-900/5 backdrop-blur-sm"
+  >
+    @if (exists()) {
+      <button type="button" class="btn-danger sm" (click)="remove()">
+        <app-icon name="trash" class="text-base" /> Eliminar
+      </button>
+    } @else {
+      <span></span>
+    }
+    <div class="flex gap-2">
+      <button type="button" class="btn-ghost sm" (click)="saved.emit()">Cancelar</button>
+      <button type="button" class="btn-primary sm" (click)="save()" [disabled]="!!bbtError()">
+        <app-icon name="check" class="text-base" /> Guardar día
+      </button>
+    </div>
+  </div>
+</div>

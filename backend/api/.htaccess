@@ -1,0 +1,8 @@
+# LunaCare API · Apache suele descartar la cabecera Authorization cuando
+# PHP corre como CGI/FastCGI. Esto la reenvía como variable de entorno.
+<IfModule mod_setenvif.c>
+    SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+</IfModule>
+
+# Fallback passthrough por si el host elimina la cabecera: el cliente
+# envía además el token en el cuerpo JSON (ver index.php → auth_user).

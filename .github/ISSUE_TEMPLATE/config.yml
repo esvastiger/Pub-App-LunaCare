@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔐 Reportar una vulnerabilidad
+    url: https://github.com/esvastiger/Pub-App-LunaCare/security/advisories/new
+    about: No abras un issue público para problemas de seguridad. Usa el aviso privado de GitHub.
+  - name: 📖 Documentación
+    url: https://github.com/esvastiger/Pub-App-LunaCare/tree/main/docs
+    about: Arquitectura, privacidad, capturas y revisión de seguridad.
+  - name: 💬 Dudas de uso
+    url: https://github.com/esvastiger/Pub-App-LunaCare/discussions
+    about: Para preguntas que no son bugs ni propuestas.

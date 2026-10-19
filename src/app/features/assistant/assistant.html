@@ -1,0 +1,88 @@
+<div class="mx-auto flex max-w-3xl flex-col gap-4">
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h1 class="font-display text-2xl font-bold text-plum-800">Asistente Luna 💬</h1>
+      <p class="text-sm font-semibold text-plum-400">
+        Consulta tus propios datos, sin salir de tu dispositivo.
+      </p>
+    </div>
+    <button type="button" class="btn-ghost sm" (click)="clear()">
+      <app-icon name="refresh" class="text-base" /> Reiniciar
+    </button>
+  </div>
+
+  <!-- Aviso permanente: nunca prometer diagnóstico -->
+  <p
+    class="flex items-start gap-2.5 rounded-2xl bg-blush-50 p-3 text-[11px] font-semibold leading-relaxed text-plum-600 ring-1 ring-blush-100"
+  >
+    <span class="text-sm leading-none">⚕️</span>
+    <span>
+      Luna resume tus registros y ofrece información general. <b>No diagnostica ni prescribe.</b>
+      Ante dolor intenso, sangrado abundante o una emergencia, acude a un profesional.
+    </span>
+  </p>
+
+  <!-- Conversación -->
+  <section class="card flex min-h-[24rem] flex-col overflow-hidden">
+    <div class="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 sm:p-5" aria-live="polite">
+      @for (m of messages(); track m.id) {
+        <div class="flex" [class.justify-end]="m.role === 'user'">
+          <div
+            class="max-w-[85%] rounded-3xl px-4 py-3 text-sm font-semibold whitespace-pre-line"
+            [class]="
+              m.role === 'user'
+                ? 'rounded-br-lg bg-linear-to-br from-blush-400 to-lilac-400 text-white shadow-glow'
+                : 'rounded-bl-lg bg-nude-100 text-plum-700'
+            "
+          >
+            {{ m.text }}
+          </div>
+        </div>
+      }
+
+      @if (thinking()) {
+        <div class="flex">
+          <div class="flex items-center gap-1.5 rounded-3xl rounded-bl-lg bg-nude-100 px-4 py-3.5">
+            <span class="dot-typing"></span>
+            <span class="dot-typing"></span>
+            <span class="dot-typing"></span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Sugerencias -->
+    <div class="flex flex-wrap gap-2 border-t border-plum-900/5 p-3">
+      @for (s of suggestions; track s) {
+        <button type="button" class="chip" (click)="send(s)">{{ s }}</button>
+      }
+    </div>
+
+    <!-- Composer -->
+    <div class="flex items-center gap-2 border-t border-plum-900/5 bg-white/70 p-3">
+      <input
+        class="input flex-1"
+        type="text"
+        maxlength="300"
+        placeholder="Pregunta sobre tu ciclo, síntomas o privacidad…"
+        [value]="draft()"
+        (input)="onInput($event)"
+        (keydown)="onKeydown($event)"
+        aria-label="Escribe tu pregunta"
+      />
+      <button
+        type="button"
+        class="btn-primary shrink-0"
+        [disabled]="!draft().trim() || thinking()"
+        (click)="send()"
+        aria-label="Enviar pregunta"
+      >
+        <app-icon name="right" class="text-base" />
+      </button>
+    </div>
+  </section>
+
+  <p class="text-center text-[11px] font-semibold text-plum-300">
+    🔒 Sin conexión a servicios externos: tus datos no salen del navegador.
+  </p>
+</div>

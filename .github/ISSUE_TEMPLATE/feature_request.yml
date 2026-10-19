@@ -1,0 +1,45 @@
+name: ✨ Proponer una mejora
+description: Ideas, funciones nuevas o cambios de diseño
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Las propuestas que respetan la privacidad y no añaden dependencias innecesarias tienen
+        prioridad. Si tu idea requiere enviar datos fuera del dispositivo, dilo desde el principio.
+  - type: textarea
+    id: problema
+    attributes:
+      label: Qué problema resuelve
+      description: Describe la necesidad antes de la solución.
+      placeholder: Cuando llevo el móvil sin batería no puedo apuntar el dolor del día y luego se me olvida…
+    validations:
+      required: true
+  - type: textarea
+    id: propuesta
+    attributes:
+      label: Propuesta
+      placeholder: Un acceso rápido desde el icono de la PWA que abra el registro de hoy…
+    validations:
+      required: true
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas consideradas
+  - type: dropdown
+    id: privacidad
+    attributes:
+      label: Impacto en privacidad
+      options:
+        - No envía ningún dato nuevo fuera del dispositivo
+        - Añade datos opcionales al servidor (cifrados)
+        - Requiere un servicio externo (explica cuál y por qué)
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirmaciones
+    attributes:
+      label: Confirmaciones
+      options:
+        - label: He revisado que no exista una propuesta igual.
+          required: true

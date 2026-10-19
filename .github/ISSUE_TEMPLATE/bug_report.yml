@@ -1,0 +1,73 @@
+name: 🐛 Reportar un error
+description: Algo no funciona como debería
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por el reporte. Antes de enviarlo, comprueba que no exista ya un issue abierto.
+
+        ⚠️ **No adjuntes datos reales de salud, capturas con tus registros, ni tu código de
+        referencia o PIN.** Para reproducir, usa una cuenta de demostración.
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: Qué pasa
+      description: Descripción clara y corta del problema.
+      placeholder: Al abrir el registro del día desde el calendario, el modal aparece vacío…
+    validations:
+      required: true
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Cómo reproducirlo
+      placeholder: |
+        1. Entrar con el código de demo
+        2. Tocar el día 8 en el calendario
+        3. Pulsar «Registrar hoy»
+        4. …
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Qué esperabas
+    validations:
+      required: true
+  - type: dropdown
+    id: plataforma
+    attributes:
+      label: Dónde ocurre
+      multiple: true
+      options:
+        - Chrome / Edge (escritorio)
+        - Safari (macOS)
+        - Chrome (Android)
+        - Safari (iOS)
+        - Firefox
+        - Instalada como PWA
+    validations:
+      required: true
+  - type: input
+    id: entorno
+    attributes:
+      label: Entorno
+      description: Versión de la app (commit o release), sistema y si el backend estaba activo.
+      placeholder: v0.1.0 · Windows 11 · sin backend
+  - type: textarea
+    id: consola
+    attributes:
+      label: Errores de consola (opcional)
+      description: Pega solo el mensaje. Revisa que no contenga datos personales.
+      render: shell
+  - type: checkboxes
+    id: confirmaciones
+    attributes:
+      label: Confirmaciones
+      options:
+        - label: He comprobado que no hay un issue duplicado.
+          required: true
+        - label: Este issue no contiene datos personales ni de salud.
+          required: true
+        - label: No es un problema de seguridad (para eso, ver SECURITY.md).
+          required: true

@@ -1,0 +1,10 @@
+# Normaliza finales de línea: el repo se edita en Windows y en CI (Linux).
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary
+
+*.bat text eol=crlf
+*.cmd text eol=crlf

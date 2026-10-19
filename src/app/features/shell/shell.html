@@ -1,0 +1,176 @@
+<div class="min-h-dvh">
+  <!-- Aviso offline (PWA): la app sigue 100% funcional; solo se pausa la sincronización -->
+  @if (online() === false) {
+    <div
+      class="animate-fade flex items-center justify-center gap-2 bg-nude-200/90 px-4 py-2 text-center text-xs font-bold text-plum-700 backdrop-blur"
+    >
+      <app-icon name="moon" class="text-sm text-lilac-400" />
+      Sin conexión — tus cambios se guardan cifrados en el dispositivo y se sincronizarán después.
+    </div>
+  }
+
+  <!-- Barra superior -->
+  <header class="sticky top-0 z-40 border-b border-plum-900/5 bg-cream/80 backdrop-blur-md">
+    <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
+      <a routerLink="/app" class="flex items-center gap-2.5">
+        <span
+          class="flex h-9 w-9 items-center justify-center rounded-2xl bg-linear-to-br from-blush-300 to-lilac-400 text-lg text-white shadow-glow"
+          >🌙</span
+        >
+        <span class="font-display text-lg font-bold text-plum-800">LunaCare</span>
+      </a>
+
+      <nav class="hidden items-center gap-1 rounded-full bg-nude-100 p-1 sm:flex">
+        @for (item of nav; track item.path) {
+          <a
+            [routerLink]="item.path"
+            routerLinkActive="nav-pill-active"
+            [routerLinkActiveOptions]="{ exact: item.path === '/app' }"
+            class="nav-pill"
+          >
+            {{ item.label }}
+          </a>
+        }
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <span
+          class="hidden items-center gap-2 text-xs font-bold text-plum-400 md:flex"
+          [title]="syncTitle()"
+        >
+          <span class="h-2 w-2 rounded-full" [class]="syncDot()"></span>
+          {{ syncLabel() }}
+        </span>
+        <button
+          type="button"
+          class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-2xl bg-white text-plum-600 shadow-card ring-1 ring-plum-900/5 transition hover:bg-blush-50"
+          (click)="openDrawer()"
+          aria-label="Abrir panel de cuenta"
+        >
+          <app-icon name="moon" class="text-lg" />
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido -->
+  <main class="mx-auto max-w-6xl px-4 pt-6 pb-24 sm:pb-10">
+    <router-outlet />
+  </main>
+
+  <!-- Navegación móvil -->
+  <nav
+    class="fixed inset-x-0 bottom-0 z-40 flex justify-around border-t border-plum-900/5 bg-white/90 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:hidden"
+  >
+    @for (item of nav; track item.path) {
+      <a
+        [routerLink]="item.path"
+        routerLinkActive="text-blush-500"
+        [routerLinkActiveOptions]="{ exact: item.path === '/app' }"
+        class="flex flex-1 flex-col items-center gap-0.5 py-1 text-[11px] font-bold text-plum-400 transition"
+      >
+        <app-icon [name]="item.icon" class="text-xl" />
+        {{ item.label }}
+      </a>
+    }
+  </nav>
+
+  <!-- Panel lateral de cuenta -->
+  @if (drawer()) {
+    <div class="fixed inset-0 z-50">
+      <div
+        class="animate-fade absolute inset-0 bg-plum-900/40 backdrop-blur-sm"
+        (click)="closeDrawer()"
+      ></div>
+      <aside
+        class="animate-pop absolute top-0 right-0 flex h-dvh w-84 max-w-[88vw] flex-col bg-white p-6 shadow-float"
+      >
+        <div class="flex items-start justify-between">
+          <h2 class="font-display text-lg font-bold text-plum-800">Tu espacio</h2>
+          <button
+            type="button"
+            class="rounded-full p-2 text-plum-400 transition hover:bg-blush-50 hover:text-plum-600"
+            (click)="closeDrawer()"
+            aria-label="Cerrar panel"
+          >
+            <app-icon name="x" class="text-lg" />
+          </button>
+        </div>
+
+        <div class="mt-5 flex items-center gap-3 rounded-2xl bg-nude-100 p-4">
+          <span
+            class="flex h-11 w-11 items-center justify-center rounded-2xl bg-linear-to-br from-blush-300 to-lilac-400 text-xl text-white shadow-glow"
+            >🌙</span
+          >
+          <div class="min-w-0">
+            <p class="truncate text-sm font-bold text-plum-800">
+              {{ session()?.email ?? 'Modo privado' }}
+            </p>
+            <span
+              class="mt-0.5 inline-block rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-plum-500 ring-1 ring-plum-900/10"
+            >
+              {{ session()?.mode === 'anonymous' ? 'Cuenta anónima' : 'Cuenta con correo' }}
+            </span>
+          </div>
+        </div>
+
+        @if (session()?.refCode; as code) {
+          <div class="mt-4 rounded-2xl bg-blush-50 p-4 ring-1 ring-blush-100">
+            <p class="text-xs font-bold text-plum-500">Número de referencia</p>
+            <p class="mt-1 font-mono text-sm font-bold tracking-widest text-plum-800">
+              {{ showCode() ? code : maskedCode() }}
+            </p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <button type="button" class="chip" (click)="showCode.set(!showCode())">
+                <app-icon [name]="showCode() ? 'eyeOff' : 'eye'" class="text-sm" />
+                {{ showCode() ? 'Ocultar' : 'Mostrar' }}
+              </button>
+              <button type="button" class="chip" (click)="copyCode()">
+                <app-icon name="copy" class="text-sm" /> Copiar
+              </button>
+              <button type="button" class="chip" (click)="downloadCode()">
+                <app-icon name="download" class="text-sm" /> Descargar
+              </button>
+            </div>
+          </div>
+        }
+
+        <div class="mt-6 space-y-2 text-sm font-bold text-plum-600">
+          <a
+            routerLink="/app/ajustes"
+            (click)="closeDrawer()"
+            class="flex items-center gap-3 rounded-2xl px-3 py-3 transition hover:bg-blush-50"
+          >
+            <app-icon name="gear" class="text-lg text-plum-400" /> Ajustes y privacidad
+          </a>
+          <a
+            routerLink="/app/estadisticas"
+            (click)="closeDrawer()"
+            class="flex items-center gap-3 rounded-2xl px-3 py-3 transition hover:bg-blush-50"
+          >
+            <app-icon name="chart" class="text-lg text-plum-400" /> Mis estadísticas
+          </a>
+          <a
+            routerLink="/app/asistente"
+            (click)="closeDrawer()"
+            class="flex items-center gap-3 rounded-2xl px-3 py-3 transition hover:bg-blush-50"
+          >
+            <app-icon name="spark" class="text-lg text-plum-400" /> Asistente Luna
+          </a>
+        </div>
+
+        <div class="mt-auto">
+          <p
+            class="mb-3 flex items-center justify-center gap-2 text-[11px] font-bold text-plum-300"
+          >
+            <span class="h-1.5 w-1.5 rounded-full" [class]="syncDot()"></span>
+            {{ syncLabel() }}
+          </p>
+          <button type="button" class="btn-ghost w-full text-rose-500" (click)="logout()">
+            <app-icon name="logout" class="text-base" /> Cerrar sesión
+          </button>
+        </div>
+      </aside>
+    </div>
+  }
+</div>

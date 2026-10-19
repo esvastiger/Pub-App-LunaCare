@@ -1,0 +1,60 @@
+# Despliegue opcional en GitHub Pages.
+#
+# Es MANUAL a propósito: nada se publica hasta que alguien lo lanza desde
+# Actions → «Publicar en GitHub Pages» → Run workflow. Antes de usarlo:
+#   1. Settings → Pages → Source: GitHub Actions.
+#   2. Ten en cuenta que sin backend la app funciona en modo local
+#      (la sincronización queda desactivada), que es el caso normal aquí.
+#   3. Con una API propia, configura la URL en Ajustes tras abrir la app.
+
+name: Publicar en GitHub Pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # El sitio vive en https://<usuario>.github.io/<repo>/, así que el base
+      # href debe incluir el nombre del repositorio.
+      - name: Build con base href del repositorio
+        run: npx ng build --base-href "/${GITHUB_REPOSITORY#*/}/"
+
+      # Pages necesita un 404.html para no romper las rutas profundas de la SPA.
+      - name: Copiar index.html como 404.html
+        run: cp dist/LunaCare/browser/index.html dist/LunaCare/browser/404.html
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/LunaCare/browser
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

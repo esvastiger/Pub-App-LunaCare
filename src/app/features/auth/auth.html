@@ -1,0 +1,679 @@
+<div class="flex min-h-dvh">
+  <!-- Panel de marca (desktop) -->
+  <aside
+    class="relative hidden w-[44%] flex-col justify-between overflow-hidden bg-linear-to-br from-blush-200 via-blush-100 to-lilac-200 p-10 lg:flex"
+  >
+    <div
+      class="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-white/40 blur-3xl"
+    ></div>
+    <div
+      class="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-lilac-300/50 blur-3xl"
+    ></div>
+
+    <div class="relative flex items-center gap-3">
+      <span
+        class="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 text-2xl shadow-card"
+        >🌙</span
+      >
+      <span class="font-display text-2xl font-bold text-plum-800">LunaCare</span>
+    </div>
+
+    <div class="relative">
+      <h1 class="font-display text-4xl font-bold leading-tight text-plum-800">
+        Tu ciclo,<br />con calma y<br />privacidad.
+      </h1>
+      <p class="mt-4 max-w-sm text-sm font-semibold leading-relaxed text-plum-600">
+        Registra tu periodo, síntomas y ánimo en un espacio elegante y seguro. Tus datos se cifran
+        en tu propio dispositivo.
+      </p>
+      <ul class="mt-8 space-y-3 text-sm font-semibold text-plum-700">
+        <li class="flex items-center gap-3">
+          <app-icon name="shield" class="text-xl text-blush-500" />
+          Cifrado local AES-256 de tus registros y notas
+        </li>
+        <li class="flex items-center gap-3">
+          <app-icon name="lock" class="text-xl text-blush-500" />
+          Modo privado: entra sin correo ni registro
+        </li>
+        <li class="flex items-center gap-3">
+          <app-icon name="spark" class="text-xl text-blush-500" />
+          Predicciones suaves de regla y fertilidad
+        </li>
+      </ul>
+    </div>
+
+    <p class="relative text-xs font-semibold text-plum-500">Hecho con 🌙 · LunaCare</p>
+  </aside>
+
+  <!-- Contenido -->
+  <main class="flex flex-1 items-center justify-center p-5 sm:p-10">
+    @switch (step()) {
+      <!-- ------------------------------------------------------ elegir acceso -->
+      @case ('choose') {
+        <div class="w-full max-w-md">
+          <div class="mb-6 flex items-center gap-3 lg:hidden">
+            <span
+              class="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-xl shadow-card"
+              >🌙</span
+            >
+            <span class="font-display text-xl font-bold text-plum-800">LunaCare</span>
+          </div>
+
+          <div class="card p-7 sm:p-8">
+            <h2 class="font-display text-2xl font-bold text-plum-800">Bienvenida 🌙</h2>
+            <p class="mt-1 text-sm font-semibold text-plum-500">Elige cómo quieres entrar.</p>
+
+            <button
+              type="button"
+              class="btn-primary mt-6 w-full flex-col gap-1 py-4"
+              (click)="startAnonymous()"
+            >
+              <span class="text-base">Modo privado · Comenzar gratis</span>
+              <span class="text-[11px] font-semibold text-white/85"
+                >Sin correo, sin registro · con código de recuperación</span
+              >
+            </button>
+
+            <button type="button" class="btn-soft mt-3 w-full" (click)="goRecover()">
+              <app-icon name="moon" class="text-base" />
+              Ya tengo un código de referencia
+            </button>
+
+            <div class="my-5 flex items-center gap-3 text-xs font-bold text-plum-300">
+              <span class="h-px flex-1 bg-plum-900/10"></span>
+              o con tu correo
+              <span class="h-px flex-1 bg-plum-900/10"></span>
+            </div>
+
+            <div class="mb-4 grid grid-cols-2 gap-1 rounded-2xl bg-nude-100 p-1">
+              <button
+                type="button"
+                class="rounded-xl px-3 py-2 text-sm font-bold transition"
+                [class]="
+                  formMode() === 'register'
+                    ? 'bg-white text-plum-800 shadow-card'
+                    : 'text-plum-400 hover:text-plum-600'
+                "
+                (click)="setFormMode('register')"
+              >
+                Crear cuenta
+              </button>
+              <button
+                type="button"
+                class="rounded-xl px-3 py-2 text-sm font-bold transition"
+                [class]="
+                  formMode() === 'login'
+                    ? 'bg-white text-plum-800 shadow-card'
+                    : 'text-plum-400 hover:text-plum-600'
+                "
+                (click)="setFormMode('login')"
+              >
+                Entrar
+              </button>
+            </div>
+
+            <form [formGroup]="emailForm" (ngSubmit)="submitEmail()" class="space-y-4">
+              <div>
+                <label class="label" for="email">Correo electrónico</label>
+                <input
+                  id="email"
+                  class="input"
+                  type="email"
+                  formControlName="email"
+                  placeholder="tu@correo.com"
+                  autocomplete="email"
+                />
+                @if (invalid(emailForm.controls.email)) {
+                  <p class="error-text">Introduce un correo válido.</p>
+                }
+              </div>
+
+              <div>
+                <label class="label" for="password">Contraseña</label>
+                <div class="relative">
+                  <input
+                    id="password"
+                    class="input pr-12"
+                    [type]="showPassword() ? 'text' : 'password'"
+                    formControlName="password"
+                    placeholder="Mínimo 8 caracteres"
+                    autocomplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-plum-300 transition hover:text-plum-500"
+                    (click)="showPassword.set(!showPassword())"
+                    [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                  >
+                    <app-icon [name]="showPassword() ? 'eyeOff' : 'eye'" class="text-lg" />
+                  </button>
+                </div>
+                @if (invalid(emailForm.controls.password)) {
+                  <p class="error-text">La contraseña necesita al menos 8 caracteres.</p>
+                }
+                @if (formMode() === 'register' && emailForm.controls.password.value) {
+                  <div class="mt-2 flex items-center gap-2">
+                    <div class="flex flex-1 gap-1">
+                      @for (i of [0, 1, 2]; track i) {
+                        <span
+                          class="h-1.5 flex-1 rounded-full"
+                          [class]="passwordStrength().score > i ? strengthColor() : 'bg-plum-100'"
+                        ></span>
+                      }
+                    </div>
+                    <span class="text-[11px] font-bold text-plum-400">{{
+                      passwordStrength().label
+                    }}</span>
+                  </div>
+                }
+              </div>
+
+              @if (formMode() === 'login' && emailGate.locked) {
+                <div
+                  class="rounded-2xl bg-rose-50 px-4 py-3 text-center text-xs font-bold text-rose-600 ring-1 ring-rose-200"
+                >
+                  Demasiados intentos · espera {{ LoginGateFmt(emailGate.secondsLeft()) }}
+                </div>
+              }
+
+              <button
+                type="submit"
+                class="btn-primary w-full"
+                [disabled]="busy() || (formMode() === 'login' && emailGate.locked)"
+              >
+                @if (busy()) {
+                  <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-opacity=".25"
+                      stroke-width="4"
+                    />
+                    <path
+                      d="M22 12a10 10 0 0 0-10-10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  Un momento…
+                } @else {
+                  {{ formMode() === 'register' ? 'Crear mi cuenta' : 'Entrar' }}
+                }
+              </button>
+            </form>
+
+            @if (!googleReady()) {
+              <button
+                type="button"
+                class="btn-ghost mt-3 w-full"
+                [disabled]="busy()"
+                (click)="goGoogle()"
+              >
+                <svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="#4285F4"
+                    d="M23.5 12.27c0-.85-.08-1.66-.22-2.45H12v4.64h6.46a5.53 5.53 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.56-5.17 3.56-8.82z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 24c3.24 0 5.96-1.07 7.94-2.91l-3.88-3c-1.07.72-2.45 1.15-4.06 1.15-3.12 0-5.77-2.11-6.71-4.95H1.29v3.1A12 12 0 0 0 12 24z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.29 14.29A7.2 7.2 0 0 1 4.91 12c0-.8.14-1.57.38-2.29v-3.1H1.29a12 12 0 0 0 0 10.78l4-3.1z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 4.77c1.76 0 3.34.6 4.58 1.79l3.44-3.44A11.98 11.98 0 0 0 1.29 6.61l4 3.1C6.23 6.88 8.88 4.77 12 4.77z"
+                  />
+                </svg>
+                Continuar con Google
+              </button>
+            } @else {
+              <div class="mt-3 rounded-2xl border border-plum-900/10 bg-white px-3 py-3">
+                <p class="mb-2 text-center text-[11px] font-bold text-plum-400">
+                  Elige tu cuenta de Google
+                </p>
+                <div #googleMount class="flex min-h-10 justify-center"></div>
+                <button
+                  type="button"
+                  class="mt-2 w-full text-center text-[11px] font-bold text-plum-400 transition hover:text-plum-600"
+                  (click)="cancelGooglePanel()"
+                >
+                  Cancelar
+                </button>
+              </div>
+            }
+
+            <p class="mt-5 text-center text-xs font-semibold leading-relaxed text-plum-400">
+              ¿Perdiste tu sesión? Entra con tu <b class="text-plum-600">código + PIN</b>: así
+              recuperas tus datos en este u otro dispositivo.
+            </p>
+          </div>
+
+          <p
+            class="mt-5 flex items-center justify-center gap-2 text-center text-xs font-semibold text-plum-400"
+          >
+            <app-icon name="lock" class="text-sm" />
+            Cifrado local · Sin anuncios · Tus datos son tuyos
+          </p>
+        </div>
+      }
+
+      <!-- ------------------------------------------------------------- PIN -->
+      @case ('anonPin') {
+        <div class="w-full max-w-md">
+          <div class="card p-7 sm:p-8">
+            <button
+              type="button"
+              class="text-xs font-bold text-plum-400 transition hover:text-plum-600"
+              (click)="backToChoose()"
+            >
+              ← Volver
+            </button>
+            <h2 class="mt-4 font-display text-2xl font-bold text-plum-800">Crea tu PIN</h2>
+            <p class="mt-1 text-sm font-semibold leading-relaxed text-plum-500">
+              Con tu PIN se cifrarán tus datos en este dispositivo. Usa entre 4 y 8 dígitos.
+            </p>
+
+            <form [formGroup]="pinForm" (ngSubmit)="confirmPin()" class="mt-6 space-y-4">
+              <div>
+                <label class="label" for="pin">Tu PIN</label>
+                <input
+                  id="pin"
+                  class="input text-center text-2xl font-bold tracking-[0.5em]"
+                  type="password"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  formControlName="pin"
+                  (input)="digits($event, pinForm.controls.pin)"
+                  placeholder="••••"
+                />
+                @if (invalid(pinForm.controls.pin)) {
+                  <p class="error-text">Usa entre 4 y 8 dígitos.</p>
+                }
+              </div>
+
+              <div>
+                <label class="label" for="pin2">Repite el PIN</label>
+                <input
+                  id="pin2"
+                  class="input text-center text-2xl font-bold tracking-[0.5em]"
+                  type="password"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  formControlName="pin2"
+                  (input)="digits($event, pinForm.controls.pin2)"
+                  placeholder="••••"
+                />
+                @if (
+                  invalid(pinForm.controls.pin2) ||
+                  (pinForm.touched && pinForm.hasError('mismatch'))
+                ) {
+                  <p class="error-text">Los PIN no coinciden.</p>
+                }
+              </div>
+
+              <button type="submit" class="btn-primary w-full" [disabled]="busy()">
+                @if (busy()) {
+                  <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-opacity=".25"
+                      stroke-width="4"
+                    />
+                    <path
+                      d="M22 12a10 10 0 0 0-10-10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  Generando…
+                } @else {
+                  Generar mi código de referencia
+                }
+              </button>
+            </form>
+          </div>
+        </div>
+      }
+
+      <!-- --------------------------------------------------- código generado -->
+      @case ('anonCode') {
+        <div class="w-full max-w-md">
+          <div class="card p-7 text-center sm:p-8">
+            <span
+              class="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-linear-to-br from-blush-300 to-lilac-400 text-2xl text-white shadow-glow"
+            >
+              🌙
+            </span>
+            <h2 class="mt-4 font-display text-2xl font-bold text-plum-800">Guarda tu código</h2>
+            <p class="mx-auto mt-1 max-w-sm text-sm font-semibold leading-relaxed text-plum-500">
+              Este es tu <b class="text-plum-700">Número de Referencia</b>. Junto con tu PIN,
+              permite recuperar tus datos en cualquier dispositivo.
+            </p>
+
+            <div class="mt-5 rounded-2xl bg-nude-100 px-4 py-5 ring-1 ring-nude-200">
+              <p class="font-mono text-2xl font-bold tracking-[0.18em] text-plum-800">
+                {{ refCode() }}
+              </p>
+            </div>
+
+            <div class="mt-4 grid grid-cols-2 gap-3">
+              <button type="button" class="btn-ghost" (click)="copyCode()">
+                <app-icon name="copy" class="text-base" /> Copiar
+              </button>
+              <button type="button" class="btn-ghost" (click)="downloadCode()">
+                <app-icon name="download" class="text-base" /> Descargar
+              </button>
+            </div>
+
+            <div
+              class="mt-5 flex items-start gap-3 rounded-2xl bg-amber-50 p-4 text-left ring-1 ring-amber-200"
+            >
+              <app-icon name="info" class="mt-0.5 text-lg text-amber-500" />
+              <p class="text-xs font-semibold leading-relaxed text-amber-700">
+                Si no vinculas un correo más adelante, este código + tu PIN serán la
+                <b>única forma</b> de recuperar tus datos. Guárdalos en un lugar seguro.
+              </p>
+            </div>
+
+            <label
+              class="mt-5 flex cursor-pointer items-center justify-center gap-2 text-sm font-semibold text-plum-600"
+            >
+              <input
+                #codeSavedCb
+                type="checkbox"
+                class="h-4 w-4 rounded accent-blush-500"
+                [checked]="codeSaved()"
+                (change)="codeSaved.set(codeSavedCb.checked)"
+              />
+              Ya lo guardé en un lugar seguro
+            </label>
+
+            <button
+              type="button"
+              class="btn-primary mt-5 w-full"
+              [disabled]="!codeSaved()"
+              (click)="finishAnonymous()"
+            >
+              Continuar al asistente
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- ------------------------------------------ PIN para cuenta Google -->
+      @case ('googleSetup') {
+        <div class="w-full max-w-md">
+          <div class="card p-7 sm:p-8">
+            <button
+              type="button"
+              class="text-xs font-bold text-plum-400 transition hover:text-plum-600"
+              (click)="backToChoose()"
+            >
+              ← Volver
+            </button>
+            <h2 class="mt-4 font-display text-2xl font-bold text-plum-800">Elige tu PIN</h2>
+            <p class="mt-1 text-sm font-semibold leading-relaxed text-plum-500">
+              Google confirma tu identidad; este PIN es la llave que cifra tus datos en el
+              dispositivo y <b>no se envía nunca</b>. Usa entre 4 y 8 dígitos.
+            </p>
+            @if (googlePending()?.email; as email) {
+              <p class="mt-3 rounded-2xl bg-nude-100 px-4 py-3 text-xs font-bold text-plum-500">
+                {{ email }}
+              </p>
+            }
+
+            <form [formGroup]="pinForm" (ngSubmit)="finishGoogleSetup()" class="mt-6 space-y-4">
+              <div>
+                <label class="label" for="gpin">Tu PIN</label>
+                <input
+                  id="gpin"
+                  class="input text-center text-2xl font-bold tracking-[0.5em]"
+                  type="password"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  formControlName="pin"
+                  (input)="digits($event, pinForm.controls.pin)"
+                  placeholder="••••"
+                />
+                @if (invalid(pinForm.controls.pin)) {
+                  <p class="error-text">Usa entre 4 y 8 dígitos.</p>
+                }
+              </div>
+
+              <div>
+                <label class="label" for="gpin2">Repite el PIN</label>
+                <input
+                  id="gpin2"
+                  class="input text-center text-2xl font-bold tracking-[0.5em]"
+                  type="password"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  formControlName="pin2"
+                  (input)="digits($event, pinForm.controls.pin2)"
+                  placeholder="••••"
+                />
+                @if (
+                  invalid(pinForm.controls.pin2) ||
+                  (pinForm.touched && pinForm.hasError('mismatch'))
+                ) {
+                  <p class="error-text">Los PIN no coinciden.</p>
+                }
+              </div>
+
+              <button type="submit" class="btn-primary w-full" [disabled]="busy()">
+                @if (busy()) {
+                  <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-opacity=".25"
+                      stroke-width="4"
+                    />
+                    <path
+                      d="M22 12a10 10 0 0 0-10-10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  Creando tu bóveda…
+                } @else {
+                  Crear mi bóveda cifrada
+                }
+              </button>
+            </form>
+          </div>
+        </div>
+      }
+
+      <!-- ----------------------------------- desbloqueo de cuenta Google -->
+      @case ('googleUnlock') {
+        <div class="w-full max-w-md">
+          <div class="card p-7 sm:p-8">
+            <button
+              type="button"
+              class="text-xs font-bold text-plum-400 transition hover:text-plum-600"
+              (click)="backToChoose()"
+            >
+              ← Volver
+            </button>
+            <h2 class="mt-4 font-display text-2xl font-bold text-plum-800">Abre tu bóveda</h2>
+            <p class="mt-1 text-sm font-semibold leading-relaxed text-plum-500">
+              Google ya confirmó tu identidad. Ahora introduce tu
+              {{ googleNeedsPin() ? 'PIN' : 'contraseña' }} para descifrar tus datos en este
+              dispositivo.
+            </p>
+            @if (googlePending()?.email; as email) {
+              <p class="mt-3 rounded-2xl bg-nude-100 px-4 py-3 text-xs font-bold text-plum-500">
+                {{ email }}
+              </p>
+            }
+
+            <form [formGroup]="googleForm" (ngSubmit)="finishGoogleUnlock()" class="mt-6 space-y-4">
+              <div>
+                <label class="label" for="gsecret"
+                  >Tu {{ googleNeedsPin() ? 'PIN' : 'contraseña' }}</label
+                >
+                <input
+                  id="gsecret"
+                  class="input text-center text-2xl font-bold"
+                  [class.tracking-[0.5em]]="googleNeedsPin()"
+                  type="password"
+                  [attr.inputmode]="googleNeedsPin() ? 'numeric' : 'text'"
+                  [attr.autocomplete]="googleNeedsPin() ? 'off' : 'current-password'"
+                  formControlName="secret"
+                  (input)="googleDigits($event)"
+                  [attr.placeholder]="googleNeedsPin() ? '••••' : 'Tu contraseña'"
+                />
+                @if (invalid(googleForm.controls.secret)) {
+                  <p class="error-text">
+                    Introduce tu {{ googleNeedsPin() ? 'PIN' : 'contraseña' }}.
+                  </p>
+                }
+                @if (googleForm.controls.secret.hasError('pattern')) {
+                  <p class="error-text">El PIN tiene entre 4 y 8 dígitos.</p>
+                }
+              </div>
+
+              @if (googleGate.locked) {
+                <div
+                  class="rounded-2xl bg-rose-50 px-4 py-3 text-center text-xs font-bold text-rose-600 ring-1 ring-rose-200"
+                >
+                  Demasiados intentos · espera {{ LoginGateFmt(googleGate.secondsLeft()) }}
+                </div>
+              }
+
+              <button
+                type="submit"
+                class="btn-primary w-full"
+                [disabled]="busy() || googleGate.locked"
+              >
+                @if (busy()) {
+                  <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-opacity=".25"
+                      stroke-width="4"
+                    />
+                    <path
+                      d="M22 12a10 10 0 0 0-10-10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  Descifrando…
+                } @else {
+                  Desbloquear
+                }
+              </button>
+            </form>
+          </div>
+        </div>
+      }
+
+      <!-- ---------------------------------------------------------- recuperar -->
+      @case ('recover') {
+        <div class="w-full max-w-md">
+          <div class="card p-7 sm:p-8">
+            <button
+              type="button"
+              class="text-xs font-bold text-plum-400 transition hover:text-plum-600"
+              (click)="backToChoose()"
+            >
+              ← Volver
+            </button>
+            <h2 class="mt-4 font-display text-2xl font-bold text-plum-800">Recupera tu sesión</h2>
+            <p class="mt-1 text-sm font-semibold text-plum-500">
+              Introduce tu código de referencia y tu PIN.
+            </p>
+
+            <form [formGroup]="recoverForm" (ngSubmit)="recover()" class="mt-6 space-y-4">
+              <div>
+                <label class="label" for="code">Código de referencia</label>
+                <input
+                  id="code"
+                  class="input font-mono uppercase tracking-widest"
+                  formControlName="code"
+                  autocomplete="off"
+                  placeholder="LUNA-XXXX-XXXX"
+                />
+                @if (invalid(recoverForm.controls.code)) {
+                  <p class="error-text">Formato: LUNA-XXXX-XXXX</p>
+                }
+              </div>
+
+              <div>
+                <label class="label" for="rpin">Tu PIN</label>
+                <input
+                  id="rpin"
+                  class="input text-center text-2xl font-bold tracking-[0.5em]"
+                  type="password"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  formControlName="pin"
+                  (input)="digits($event, recoverForm.controls.pin)"
+                  placeholder="••••"
+                />
+                @if (invalid(recoverForm.controls.pin)) {
+                  <p class="error-text">Usa entre 4 y 8 dígitos.</p>
+                }
+              </div>
+
+              @if (recoverGate.locked) {
+                <div
+                  class="rounded-2xl bg-rose-50 px-4 py-3 text-center text-xs font-bold text-rose-600 ring-1 ring-rose-200"
+                >
+                  Demasiados intentos · espera {{ LoginGateFmt(recoverGate.secondsLeft()) }}
+                </div>
+              }
+
+              <button
+                type="submit"
+                class="btn-primary w-full"
+                [disabled]="busy() || recoverGate.locked"
+              >
+                @if (busy()) {
+                  <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-opacity=".25"
+                      stroke-width="4"
+                    />
+                    <path
+                      d="M22 12a10 10 0 0 0-10-10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  Comprobando…
+                } @else {
+                  Recuperar mis datos
+                }
+              </button>
+            </form>
+          </div>
+        </div>
+      }
+    }
+  </main>
+</div>

@@ -1,0 +1,284 @@
+<div class="mx-auto max-w-3xl space-y-6">
+  <div>
+    <h1 class="font-display text-2xl font-bold text-plum-800">Ajustes y privacidad</h1>
+    <p class="text-sm font-semibold text-plum-400">Tus datos, tus reglas.</p>
+  </div>
+
+  <!-- Cuenta -->
+  <section class="card p-5 sm:p-6">
+    <h2 class="font-display text-base font-bold text-plum-800">Cuenta</h2>
+    <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span
+          class="flex h-11 w-11 items-center justify-center rounded-2xl bg-linear-to-br from-blush-300 to-lilac-400 text-xl text-white shadow-glow"
+          >🌙</span
+        >
+        <div>
+          <p class="text-sm font-bold text-plum-800">{{ session()?.email ?? 'Modo privado' }}</p>
+          <span
+            class="inline-block rounded-full bg-nude-100 px-2 py-0.5 text-[10px] font-bold text-plum-500 ring-1 ring-plum-900/10"
+          >
+            {{ accountLabel() }}
+          </span>
+          @if (googleLinked()) {
+            <span
+              class="ml-1 inline-block rounded-full bg-nude-100 px-2 py-0.5 text-[10px] font-bold text-sage-500 ring-1 ring-plum-900/10"
+            >
+              Google vinculado
+            </span>
+          }
+        </div>
+      </div>
+      @if (isAnonymous()) {
+        <button type="button" class="btn-soft" (click)="openLink()">
+          <app-icon name="mail" class="text-base" /> Vincular correo definitivo
+        </button>
+      }
+      @if (canLinkGoogle() && !linkGoogleReady()) {
+        <button type="button" class="btn-soft" (click)="startLinkGoogle()" [disabled]="busy()">
+          <app-icon name="shield" class="text-base" /> Vincular con Google
+        </button>
+      }
+    </div>
+    @if (linkGoogleReady()) {
+      <div class="mt-3 rounded-2xl border border-plum-900/10 bg-white px-3 py-3">
+        <p class="mb-2 text-center text-[11px] font-bold text-plum-400">
+          Elige la cuenta de Google con el mismo correo
+        </p>
+        <div #googleMountLink class="flex min-h-10 justify-center"></div>
+        <button
+          type="button"
+          class="mt-2 w-full text-center text-[11px] font-bold text-plum-400 transition hover:text-plum-600"
+          (click)="cancelLinkGoogle()"
+        >
+          Cancelar
+        </button>
+      </div>
+    }
+    @if (isAnonymous()) {
+      <p class="mt-3 text-xs font-semibold leading-relaxed text-plum-400">
+        Al vincular un correo conservas todos tus datos y podrás entrar también desde otros
+        dispositivos con email + contraseña (además de tu código + PIN). Después podrás añadir
+        Google desde esta misma tarjeta.
+      </p>
+    } @else if (googleLinked()) {
+      <p class="mt-3 text-xs font-semibold leading-relaxed text-plum-400">
+        Puedes entrar con Google, pero tu {{ session()?.mode === 'google' ? 'PIN' : 'contraseña' }}
+        sigue siendo necesario para descifrar la bóveda en cada dispositivo.
+      </p>
+    }
+  </section>
+
+  <!-- Código de referencia -->
+  @if (isAnonymous()) {
+    <section class="card p-5 sm:p-6">
+      <h2 class="font-display text-base font-bold text-plum-800">Número de referencia</h2>
+      <p class="mt-1 text-xs font-semibold text-plum-400">
+        Junto con tu PIN, recupera tu sesión y tus datos desde cualquier dispositivo.
+      </p>
+      <div class="mt-3 flex flex-wrap items-center gap-2">
+        <code
+          class="rounded-2xl bg-nude-100 px-4 py-3 font-mono text-sm font-bold tracking-widest text-plum-800 ring-1 ring-nude-200"
+        >
+          {{ showCode() ? session()?.refCode : 'LUNA-••••-••••' }}
+        </code>
+        <button type="button" class="chip" (click)="showCode.set(!showCode())">
+          <app-icon [name]="showCode() ? 'eyeOff' : 'eye'" class="text-sm" />
+          {{ showCode() ? 'Ocultar' : 'Mostrar' }}
+        </button>
+        <button type="button" class="chip" (click)="copyCode()">
+          <app-icon name="copy" class="text-sm" /> Copiar
+        </button>
+        <button type="button" class="chip" (click)="downloadCode()">
+          <app-icon name="download" class="text-sm" /> Descargar
+        </button>
+      </div>
+    </section>
+  }
+
+  <!-- Privacidad -->
+  <section class="card p-5 sm:p-6">
+    <h2 class="font-display text-base font-bold text-plum-800">Privacidad</h2>
+    <ul class="mt-3 space-y-2.5 text-sm font-semibold text-plum-600">
+      <li class="flex items-start gap-3">
+        <app-icon name="shield" class="mt-0.5 text-lg text-blush-500" />
+        Tus registros y notas se cifran con <b>AES-256-GCM</b> en tu dispositivo.
+      </li>
+      <li class="flex items-start gap-3">
+        <app-icon name="lock" class="mt-0.5 text-lg text-blush-500" />
+        La clave se deriva de tu PIN/contraseña con <b>PBKDF2 (210.000 iteraciones)</b>, no se envía
+        al servidor y <b>no se guarda en el dispositivo</b>: se pide al volver a abrir la app.
+      </li>
+      <li class="flex items-start gap-3">
+        <app-icon name="info" class="mt-0.5 text-lg text-blush-500" />
+        Si activas la sincronización, el servidor solo recibe <b>texto cifrado</b>: ni siquiera
+        puede leer tus notas.
+      </li>
+    </ul>
+
+    <div class="mt-5 space-y-4 border-t border-plum-900/5 pt-4">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="text-sm font-bold text-plum-700">Sincronizar con mi servidor</p>
+          <p class="text-xs font-semibold text-plum-400">
+            Copia cifrada de la bóveda en MySQL para multi-dispositivo.
+          </p>
+        </div>
+        <app-toggle [checked]="syncEnabled()" (checkedChange)="toggleSync($event)" />
+      </div>
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="text-sm font-bold text-plum-700">Recordar mi cuenta en este dispositivo</p>
+          <p class="text-xs font-semibold text-plum-400">
+            El PIN se pide siempre al abrir. Si lo desactivas, tendrás que elegir la cuenta en cada
+            pestaña nueva.
+          </p>
+        </div>
+        <app-toggle [checked]="auth.remember()" (checkedChange)="toggleRemember($event)" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Datos -->
+  <section class="card p-5 sm:p-6">
+    <h2 class="font-display text-base font-bold text-plum-800">Tus datos</h2>
+    <div class="mt-3 flex flex-wrap gap-3">
+      <button type="button" class="btn-ghost" (click)="exportData()">
+        <app-icon name="download" class="text-base" /> Exportar copia (JSON)
+      </button>
+      <button type="button" class="btn-danger" (click)="openWipe()">
+        <app-icon name="trash" class="text-base" /> Borrar todos mis datos
+      </button>
+    </div>
+  </section>
+
+  <!-- Dónde están los datos -->
+  <section class="card p-5 sm:p-6">
+    <h2 class="font-display text-base font-bold text-plum-800">Dónde están tus datos</h2>
+    <p class="mt-1 text-xs font-semibold leading-relaxed text-plum-400">
+      Tu bóveda siempre vive cifrada en este dispositivo. Esto es lo que sale —y lo que no— cuando
+      hay conexión.
+    </p>
+
+    <div class="mt-4 space-y-3">
+      <!-- Dispositivo -->
+      <div class="flex gap-3 rounded-2xl bg-nude-100/70 p-3 ring-1 ring-plum-900/5">
+        <app-icon name="lock" class="mt-0.5 text-lg text-sage-500" />
+        <div>
+          <p class="flex flex-wrap items-center gap-2 text-sm font-bold text-plum-700">
+            En este dispositivo
+            <span
+              class="rounded-full bg-sage-400/15 px-2 py-0.5 text-[10px] font-bold text-sage-500"
+            >
+              Siempre
+            </span>
+          </p>
+          <p class="mt-1 text-xs font-semibold leading-relaxed text-plum-500">
+            Copia completa cifrada con <b>AES-256-GCM</b>. Con ella la app funciona sin conexión.
+          </p>
+        </div>
+      </div>
+
+      <!-- Servidor de sincronización -->
+      <div class="flex gap-3 rounded-2xl bg-white p-3 ring-1 ring-plum-900/10">
+        <app-icon name="refresh" class="mt-0.5 text-lg text-plum-400" />
+        <div>
+          <p class="flex flex-wrap items-center gap-2 text-sm font-bold text-plum-700">
+            En tu servidor de sincronización
+            <span class="rounded-full px-2 py-0.5 text-[10px] font-bold" [class]="remoteBadge()">
+              {{ remoteLabel() }}
+            </span>
+          </p>
+          <p class="mt-1 text-xs font-semibold leading-relaxed text-plum-500">
+            {{ remoteDetail() }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Google -->
+      @if (hasGoogleIdentity()) {
+        <div class="flex gap-3 rounded-2xl bg-white p-3 ring-1 ring-plum-900/10">
+          <app-icon name="shield" class="mt-0.5 text-lg text-plum-400" />
+          <div>
+            <p class="flex flex-wrap items-center gap-2 text-sm font-bold text-plum-700">
+              Google
+              <span
+                class="rounded-full bg-nude-100 px-2 py-0.5 text-[10px] font-bold text-plum-500"
+              >
+                Solo identidad
+              </span>
+            </p>
+            <p class="mt-1 text-xs font-semibold leading-relaxed text-plum-500">
+              Google confirma quién eres al entrar y no recibe tus registros, tu PIN ni la bóveda.
+              La copia remota, si existe, está en
+              <b class="text-plum-700">{{ apiHost() }}</b
+              >, no en Google.
+            </p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <p
+      class="mt-4 border-t border-plum-900/5 pt-3 text-[11px] font-semibold leading-relaxed text-plum-400"
+    >
+      El envío se controla con «Sincronizar con mi servidor». Si está desactivado o el servidor no
+      responde, todo se queda en este dispositivo. Para sincronizar entre dispositivos, despliega
+      <code class="rounded bg-nude-100 px-1.5 py-0.5 font-mono">backend/api</code> y apunta la app a
+      su URL.
+    </p>
+  </section>
+
+  <!-- Vincular correo (modal) -->
+  <app-modal [(open)]="linkOpen" title="Vincular correo definitivo">
+    <form [formGroup]="linkForm" (ngSubmit)="link()" class="space-y-4">
+      <div>
+        <label class="label" for="link-email">Correo electrónico</label>
+        <input
+          id="link-email"
+          class="input"
+          type="email"
+          formControlName="email"
+          placeholder="tu@correo.com"
+          autocomplete="email"
+        />
+        @if (linkForm.controls.email.invalid && linkForm.controls.email.touched) {
+          <p class="error-text">Introduce un correo válido.</p>
+        }
+      </div>
+      <div>
+        <label class="label" for="link-password">Nueva contraseña</label>
+        <input
+          id="link-password"
+          class="input"
+          type="password"
+          formControlName="password"
+          placeholder="Mínimo 8 caracteres"
+          autocomplete="new-password"
+        />
+        @if (linkForm.controls.password.invalid && linkForm.controls.password.touched) {
+          <p class="error-text">La contraseña necesita al menos 8 caracteres.</p>
+        }
+      </div>
+      <p class="rounded-2xl bg-blush-50 p-3 text-xs font-semibold leading-relaxed text-plum-500">
+        🔒 Tus datos se re-cifrarán con la nueva contraseña. Podrás seguir usando tu código + PIN si
+        quieres.
+      </p>
+      <button type="submit" class="btn-primary w-full" [disabled]="busy()">Vincular cuenta</button>
+    </form>
+  </app-modal>
+
+  <!-- Borrar datos (modal) -->
+  <app-modal [(open)]="wipeOpen" title="¿Borrar todos los datos?">
+    <p class="text-sm font-semibold leading-relaxed text-plum-500">
+      Se eliminarán tu cuenta, registros y notas de <b>este dispositivo</b> y del servidor de
+      sincronización. Esta acción no se puede deshacer.
+    </p>
+    <div class="mt-5 flex justify-end gap-2">
+      <button type="button" class="btn-ghost" (click)="wipeOpen.set(false)">Cancelar</button>
+      <button type="button" class="btn-danger" (click)="wipe()">
+        <app-icon name="trash" class="text-base" /> Sí, borrar todo
+      </button>
+    </div>
+  </app-modal>
+</div>

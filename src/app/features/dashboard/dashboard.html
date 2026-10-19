@@ -1,0 +1,254 @@
+<div class="space-y-6">
+  <!-- Cabecera -->
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h1 class="font-display text-2xl font-bold text-plum-800">{{ greeting() }} 🌙</h1>
+      <p class="text-sm font-semibold text-plum-400 capitalize">{{ todayLong }}</p>
+    </div>
+    <button type="button" class="btn-primary" (click)="openDay(todayISO())">
+      <app-icon name="plus" class="text-base" />
+      Registrar hoy
+    </button>
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-3">
+    <!-- Calendario -->
+    <section class="card p-5 sm:p-6 lg:col-span-2">
+      <app-month-calendar (daySelect)="openDay($event)" />
+
+      @if (recentChips().length) {
+        <div class="mt-5 border-t border-plum-900/5 pt-4">
+          <p class="mb-2 text-xs font-bold text-plum-400 uppercase">Últimos ciclos</p>
+          <div class="flex flex-wrap gap-2">
+            @for (c of recentChips(); track c.start) {
+              <span class="chip cursor-default">
+                {{ c.cycleLength ? c.cycleLength + ' días' : 'primer ciclo' }} ·
+                {{ fmtShort(c.start) }}
+              </span>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Acciones rápidas -->
+      <div class="mt-4 border-t border-plum-900/5 pt-4">
+        <p class="mb-2 text-xs font-bold text-plum-400 uppercase">Acciones rápidas</p>
+        <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <button type="button" class="quick-action" (click)="openDay(todayISO())">
+            <span class="text-base">✍️</span>
+            <span>Registrar hoy</span>
+          </button>
+          <a routerLink="/app/estadisticas" class="quick-action">
+            <span class="text-base">📊</span>
+            <span>Estadísticas</span>
+          </a>
+          <a routerLink="/app/asistente" class="quick-action">
+            <span class="text-base">💬</span>
+            <span>Preguntar a Luna</span>
+          </a>
+          <button type="button" class="quick-action" (click)="openDisclaimer()">
+            <span class="text-base">ℹ️</span>
+            <span>Aviso médico</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Columna lateral -->
+    <div class="space-y-5">
+      <!-- Hoy -->
+      <section class="card p-5 sm:p-6">
+        <div class="flex items-center justify-between">
+          <h2 class="font-display text-base font-bold text-plum-800">Hoy</h2>
+          @if (phaseMeta(); as pm) {
+            <span class="rounded-full bg-blush-100 px-3 py-1 text-[11px] font-bold text-plum-600">
+              {{ pm.emoji }} {{ pm.label }}
+            </span>
+          }
+        </div>
+
+        @if (insights().cycleDayToday) {
+          <p class="mt-2 text-sm font-semibold text-plum-500">
+            Día <b class="text-plum-800">{{ insights().cycleDayToday }}</b> de tu ciclo ·
+            {{ phaseMeta()?.hint }}
+          </p>
+        }
+
+        @if (todaySummary(); as s) {
+          <div class="mt-4 flex flex-wrap gap-1.5">
+            @if (s.flow; as f) {
+              <span class="chip cursor-default !px-2.5 !py-1">{{ f.emoji }} {{ f.label }}</span>
+            }
+            @if (s.pain; as p) {
+              <span class="chip cursor-default !px-2.5 !py-1">🤕 Dolor {{ p.label }}</span>
+            }
+            @if (s.breast; as b) {
+              <span class="chip cursor-default !px-2.5 !py-1">🎗️ Pecho {{ b.label }}</span>
+            }
+            @if (s.mood; as m) {
+              <span class="chip cursor-default !px-2.5 !py-1">{{ m.emoji }} {{ m.label }}</span>
+            }
+            @if (s.libido != null) {
+              <span class="chip cursor-default !px-2.5 !py-1">💗 Libido {{ s.libido }}/10</span>
+            }
+            @if (s.sleep != null) {
+              <span class="chip cursor-default !px-2.5 !py-1">🌙 Sueño {{ s.sleep }}/10</span>
+            }
+            @if (s.stress; as st) {
+              <span class="chip cursor-default !px-2.5 !py-1"
+                >🧘 Estrés {{ st === 'low' ? 'bajo' : st === 'medium' ? 'medio' : 'alto' }}</span
+              >
+            }
+            @if (s.bbt != null) {
+              <span class="chip cursor-default !px-2.5 !py-1">🌡️ {{ s.bbtLabel }} °C</span>
+            }
+            @if (s.mucus; as mu) {
+              <span class="chip cursor-default !px-2.5 !py-1"
+                >💧
+                {{
+                  mu === 'dry'
+                    ? 'Moco seco'
+                    : mu === 'sticky'
+                      ? 'Moco pegajoso'
+                      : mu === 'creamy'
+                        ? 'Moco cremoso'
+                        : 'Clara de huevo'
+                }}</span
+              >
+            }
+            @if (s.digestion; as dg) {
+              <span class="chip cursor-default !px-2.5 !py-1">🍵 {{ s.digestionLabel }}</span>
+            }
+            @for (sym of s.symptoms; track sym.id) {
+              <span class="chip cursor-default !px-2.5 !py-1">{{ sym.emoji }} {{ sym.label }}</span>
+            }
+          </div>
+          @if (s.note) {
+            <p
+              class="mt-2.5 rounded-2xl bg-nude-100 p-3 text-xs font-semibold leading-relaxed text-plum-500 italic"
+            >
+              “{{ s.note }}”
+            </p>
+          }
+        } @else {
+          <p class="mt-3 text-sm font-semibold text-plum-400">Aún no has registrado nada hoy.</p>
+          <button type="button" class="btn-soft mt-3 w-full" (click)="openDay(todayISO())">
+            <app-icon name="plus" class="text-base" /> ¿Cómo te sientes?
+          </button>
+        }
+      </section>
+
+      <!-- Próxima regla -->
+      <section class="card p-5 sm:p-6">
+        <div class="flex items-center justify-between">
+          <h2 class="font-display text-base font-bold text-plum-800">Próxima regla</h2>
+          <span class="text-[11px] font-bold text-plum-300">estimación</span>
+        </div>
+        <p class="mt-2 font-display text-3xl font-bold text-plum-800">{{ nextStartFormatted() }}</p>
+        <p class="text-sm font-bold text-blush-500">{{ countdown() }}</p>
+
+        @if (cycleProgress() > 0) {
+          <div class="mt-4">
+            <div class="h-2.5 overflow-hidden rounded-full bg-nude-100">
+              <div
+                class="h-full rounded-full bg-linear-to-r from-blush-300 to-lilac-400 transition-all"
+                [style.width.%]="cycleProgress()"
+              ></div>
+            </div>
+            <p class="mt-1.5 text-[11px] font-bold text-plum-300">
+              {{ cycleProgress() }}% del ciclo completado
+            </p>
+          </div>
+        }
+      </section>
+
+      <!-- Fertilidad -->
+      <section class="card p-5 sm:p-6">
+        <h2 class="font-display text-base font-bold text-plum-800">Fertilidad</h2>
+        <p class="mt-2 text-sm font-semibold text-plum-500">
+          Ventana fértil estimada<br />
+          <b class="text-plum-800">{{ fertileRangeFormatted() }}</b>
+        </p>
+        @if (insights().ovulationDate) {
+          <p class="mt-2 text-xs font-bold text-lilac-500">
+            ✨ Ovulación: {{ fmtMedium(insights().ovulationDate!) }}
+          </p>
+        }
+      </section>
+
+      <!-- Aviso médico (disclaimer) -->
+      <section class="card p-5 sm:p-6">
+        <button
+          type="button"
+          class="flex w-full cursor-pointer items-center gap-3 text-left"
+          (click)="openDisclaimer()"
+          aria-label="Leer el aviso médico y la limitación de responsabilidad"
+        >
+          <span
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-nude-100 text-base"
+            >⚕️</span
+          >
+          <span class="min-w-0 flex-1">
+            <span class="block text-sm font-bold text-plum-700">Aviso médico</span>
+            <span class="block text-[11px] font-semibold text-plum-400">
+              LunaCare orienta, no diagnostica. Léelo antes de tomar decisiones.
+            </span>
+          </span>
+          <app-icon name="right" class="text-base text-plum-300" />
+        </button>
+      </section>
+    </div>
+  </div>
+
+  <!-- Modal del aviso médico -->
+  <app-modal [(open)]="disclaimerOpen" title="Aviso médico y límites de uso">
+    <div class="space-y-3 text-sm font-semibold leading-relaxed text-plum-600">
+      <p class="rounded-2xl bg-blush-50 p-3 text-xs font-bold text-plum-600 ring-1 ring-blush-100">
+        LunaCare es una herramienta de <b>registro y estimación</b>. No es un dispositivo médico ni
+        sustituye la valoración de un profesional sanitario.
+      </p>
+      <ul class="space-y-2.5">
+        <li class="flex gap-2.5">
+          <span class="text-blush-500">•</span>
+          <span
+            >Las predicciones de periodo, ovulación y ventana fértil son
+            <b>estimaciones estadísticas</b> basadas en tus registros. No deben usarse como método
+            anticonceptivo.</span
+          >
+        </li>
+        <li class="flex gap-2.5">
+          <span class="text-blush-500">•</span>
+          <span
+            >El asistente conversacional resume <b>tus propios datos</b> y ofrece información
+            general. No emite diagnósticos ni receta tratamientos.</span
+          >
+        </li>
+        <li class="flex gap-2.5">
+          <span class="text-blush-500">•</span>
+          <span
+            >Consulta a tu médico si tienes dolor intenso, sangrado abundante o prolongado, fiebre,
+            desmayos o cambios bruscos en tu ciclo.</span
+          >
+        </li>
+        <li class="flex gap-2.5">
+          <span class="text-blush-500">•</span>
+          <span>Ante una <b>emergencia</b>, llama a los servicios de urgencia de tu país.</span>
+        </li>
+      </ul>
+      <p class="text-[11px] font-semibold text-plum-400">
+        Tus registros se cifran en tu dispositivo. Al usar el asistente, tus datos no se envían a
+        terceros.
+      </p>
+    </div>
+    <div class="mt-5 flex justify-end">
+      <button type="button" class="btn-primary" (click)="disclaimerOpen.set(false)">
+        Entendido
+      </button>
+    </div>
+  </app-modal>
+
+  <!-- Modal de registro diario -->
+  <app-modal [(open)]="logOpen" [title]="modalTitle()">
+    <app-daily-log [date]="editDate()" (saved)="closeLog()" />
+  </app-modal>
+</div>

@@ -74,6 +74,18 @@ export class Shell {
       })[this.sync.status()],
   );
 
+  /** Frase clara para el panel de cuenta: dónde vive la bóveda ahora mismo. */
+  readonly dataLocation = computed(
+    () =>
+      ({
+        synced: 'Datos cifrados en este dispositivo y en tu servidor.',
+        syncing: 'Guardados aquí; subiendo una copia cifrada al servidor…',
+        offline: 'Datos cifrados solo en este dispositivo (sin conexión).',
+        error: 'Datos cifrados solo en este dispositivo: el servidor no responde.',
+        disabled: 'Datos cifrados solo en este dispositivo: sincronización desactivada.',
+      })[this.sync.status()],
+  );
+
   readonly maskedCode = computed(() => {
     const code = this.session()?.refCode;
     return code ? `LUNA-••••-••••` : '';

@@ -109,8 +109,18 @@
             <span
               class="mt-0.5 inline-block rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-plum-500 ring-1 ring-plum-900/10"
             >
-              {{ session()?.mode === 'anonymous' ? 'Cuenta anónima' : 'Cuenta con correo' }}
+              {{
+                session()?.mode === 'anonymous'
+                  ? 'Cuenta anónima'
+                  : session()?.mode === 'google'
+                    ? 'Cuenta de Google'
+                    : 'Cuenta con correo'
+              }}
             </span>
+            <p class="mt-1.5 flex items-start gap-1.5 text-[11px] font-semibold text-plum-400">
+              <app-icon name="lock" class="mt-px shrink-0 text-[11px] text-sage-500" />
+              <span>{{ dataLocation() }}</span>
+            </p>
           </div>
         </div>
 
